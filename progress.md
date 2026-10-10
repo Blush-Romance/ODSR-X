@@ -72,9 +72,18 @@ Douban 选参（val）：λ=50 p=0.25 β=0.25 **w=2**，val .1669→.1986。
 Douban 消融：物品视图单独（同配置）test .2172/.2043 → 融合只再 +0.5%/+0.2%。**Douban 的增益主要来自闭式物品视图，必须如实写。**
 Yelp2018：官方 ckpt 复现 .0817/.0536；EASE λ400 .0729/.0487；GF-CF α0.3 .0753/.0493；官方 ckpt+EASE 融合（测试集探针）最好 w=0.25 .0827/.0545（+1.2%，互补性弱）。
 
+## Epinions 多种子（配置在 val 上冻结：E*=4, λ200 p.25 β.25 w.25）
+| seed | 同管线 ODSR | ODSR-X |
+|---|---|---|
+| 2026 | .0822/.0477 | .0895/.0522 |
+| 2027 | .0836/.0482 | .0882/.0520 |
+| 2028 | .0813/.0469 | .0906/.0522 |
+| 均值 | .0824/.0476 | **.0894/.0521** |
+vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能写稳定领先**）；vs SGIL +5.9%/+6.5%；vs 同管线 ODSR 3/3 种子全赢。
+
 ## 运行中（无人值守链）
 - scripts/chain_yelp2018.sh（log: logs/chain_yelp2018.log）：Yelp val-run → 选参 → 全量 E* → test 一次，结束打印 CHAIN_YELP_DONE
-- scripts/chain_seeds_epinions.sh（log: logs/chain_seeds_epinions.log）：Epinions seed 2027/2028
+- ~~scripts/chain_seeds_epinions.sh~~ 已完成
 
 ## 事故记录
 - 2026-10-11 01:4x /mnt/data 写满（我方先验缓存+探针 B 矩阵共 51GB）→ Douban 选参进程 OSError 退出；已删全部可再生缓存、缓存改为 opt-in（ODSRX_CACHE），重跑。
