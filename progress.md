@@ -102,3 +102,11 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
   | 官方 ckpt | .0817 / .0536 | .0828 / .0546 |
 - 对照：ODSR 论文 .0817/.0536，上游仓库 .0808/.0533 ⇒ ODSR-X(自训) +0.6% / +1.3%，单种子，幅度小，不能说稳定领先；融合对同管线图 +2.7%/+2.7%。
 - Yelp 上物品视图互补性弱（与 step-0 一致）。
+
+## 2026-10-11 诊断：自训图模型为何弱于官方 ckpt（进行中）
+- 代码层：odsrx/backbone.py+model.py 与官方 ODSR.py/main.py 逐行对照，loss、三次前向、SSL、均匀负采样、丢尾 batch 全一致；图矩阵此前已验证差为 0。
+- 同协议（全 train、每轮测 test、按 test 选轮）下自训 Epinions 峰值 .0829@ep5（run 231443），官方 ckpt .0885。
+- 上游仓库自训（GPU、test 选轮）：Epinions .0863@ep4、Yelp .0808@ep3，同样低于官方 ckpt（.0885/.0817）⇒ 官方 ckpt 难以从 released config 复现不是我们独有。
+- 官方 ckpt 提交于 cac11ca (2026-04-09)，main.py（含 released config）晚至 5acd95a (2026-06-13) 才加入 ⇒ ckpt 可能出自更早/不同的配置。
+- ckpt 统计：官方 item 嵌入范数更小（Yelp .305 vs 自训 .438；Epinions .316 vs .327~.358），无法单凭此定论。
+- 决定性实验：原样运行官方 main.py --train（epinions, cpu, seed 2026, 8 线程）→ runs/hs-Ubuntu_20261011_071744_epinions_official-main-s2026/
