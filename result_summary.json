@@ -1,0 +1,18 @@
+{
+  "best_epoch": 10,
+  "metrics": {
+    "recall@10": 0.134551,
+    "recall@20": 0.189761,
+    "ndcg@10": 0.165671,
+    "ndcg@20": 0.172059
+  },
+  "environment": {
+    "python": "3.9.25",
+    "torch": "2.8.0+cu128",
+    "numpy": "2.0.2",
+    "scipy": "1.13.1",
+    "gpu": "RTX 5070 Ti"
+  },
+  "trained_from_random_initialization": true,
+  "cpu_activation_offload": false
+}

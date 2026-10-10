@@ -1,0 +1,5 @@
+{
+  "dataset/douban-book/test.txt": "0594b8520d9bb30d9e8b1ef10d7a17b95dab2d7e007322d7a240895c0dd6d067",
+  "dataset/douban-book/train.txt": "10d1ae2e4666610af71a1b4d6af4e39d592906cd2c735b10e092e65966e1e31e",
+  "dataset/douban-book/trust.txt": "feaf07d2cd3c6b03fdfa4e0f0fd21b34ff8fbb21d8d1efaf0149c4e72c87afa3"
+}
