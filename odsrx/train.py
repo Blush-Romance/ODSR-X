@@ -58,6 +58,8 @@ def main():
     ap.add_argument("--eval_interval", type=int, default=1)
     ap.add_argument("--patience", type=int, default=10)
     ap.add_argument("--val_ratio", type=float, default=0.0)
+    ap.add_argument("--hard_ratio", type=float, default=0.0, help="fraction of negatives drawn from the prior's top-K unseen items")
+    ap.add_argument("--hard_k", type=int, default=100)
     ap.add_argument("--init_backbone", default=None, help="optional official ODSR checkpoint to warm-start the backbone")
     ap.add_argument("--run_dir", required=True)
     args = ap.parse_args()
@@ -99,6 +101,16 @@ def main():
         pass
     json.dump(meta, open(os.path.join(args.run_dir, "meta.json"), "w"), indent=1)
 
+    hard_pool = None
+    if args.hard_ratio > 0:
+        assert prior is not None, "prior-guided negatives need a prior"
+        t = time.time(); hard_pool = torch.empty(data.user_num, args.hard_k, dtype=torch.long)
+        for st in range(0, data.user_num, 2048):
+            s = prior[st:st + 2048].float().cpu().clone()
+            rows, cols = data.R[st:st + 2048].nonzero()
+            s[torch.from_numpy(rows), torch.from_numpy(cols)] = -float("inf")
+            hard_pool[st:st + 2048] = torch.topk(s, args.hard_k, dim=1).indices
+        print(f"hard pool ready ({time.time()-t:.0f}s) k={args.hard_k} ratio={args.hard_ratio}", flush=True)
     users = torch.from_numpy(data.train_data[:, 0])
     items = torch.from_numpy(data.train_data[:, 1])
     n_batch = max(1, len(users) // args.batch_size)
@@ -113,7 +125,12 @@ def main():
         for bi in range(n_batch):
             b = perm[bi * args.batch_size:(bi + 1) * args.batch_size]
             u, p = users[b].to(dev), items[b].to(dev)
-            n = torch.randint(0, data.item_num, (len(b),), device=dev)
+            n = torch.randint(0, data.item_num, (len(b),))
+            if hard_pool is not None:
+                use = torch.rand(len(b)) < args.hard_ratio
+                hn = hard_pool[users[b], torch.randint(0, args.hard_k, (len(b),))]
+                n = torch.where(use, hn, n)
+            n = n.to(dev)
             loss, parts = model.compute_loss(u, p, n)
             opt.zero_grad(); loss.backward(); opt.step()
             tot["loss"] += loss.item(); tot["rec"] += parts["rec"]; tot["ssl"] += parts["ssl"]

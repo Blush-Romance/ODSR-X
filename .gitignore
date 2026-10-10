@@ -13,3 +13,4 @@ logs/
 results/
 cache/
 *.npy
+runs/
