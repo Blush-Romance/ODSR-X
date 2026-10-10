@@ -110,3 +110,7 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - 官方 ckpt 提交于 cac11ca (2026-04-09)，main.py（含 released config）晚至 5acd95a (2026-06-13) 才加入 ⇒ ckpt 可能出自更早/不同的配置。
 - ckpt 统计：官方 item 嵌入范数更小（Yelp .305 vs 自训 .438；Epinions .316 vs .327~.358），无法单凭此定论。
 - 决定性实验：原样运行官方 main.py --train（epinions, cpu, seed 2026, 8 线程）→ runs/hs-Ubuntu_20261011_071744_epinions_official-main-s2026/
+- **结论（2026-10-11 08:00）**：官方 main.py 原样训练 Epinions（cpu, seed 2026）test R@20 = ep2 .0772 / ep4 .0822 / ep6 **.0830** / ep8 .0801；
+  我方 odsrx 同协议 run 231443 = ep2 .0772 / ep4 .0822 / ep6 .0828 ⇒ **两份代码逐轮吻合，我方实现无缺陷**。
+  官方 ckpt 的 .0885 无法由公开代码+公开配置复现（差 6.6%）；上游仓库 GPU 自训 .0863 亦未达到。
+  ⇒ 论文主表：同管线对比（ODSR vs ODSR-X，均自训）为主；"官方 ckpt + 物品视图"作为补充行，并注明 ckpt 不可复现。
