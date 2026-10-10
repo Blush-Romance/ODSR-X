@@ -1,0 +1,23 @@
+{
+  "dataset": "yelp2018",
+  "best_epoch": 3,
+  "metrics": {
+    "recall@10": 0.048999,
+    "recall@20": 0.080804,
+    "ndcg@10": 0.041954,
+    "ndcg@20": 0.053348
+  },
+  "training_mode": "scratch",
+  "checkpoint_loaded": false,
+  "completed_evaluations": 53,
+  "environment": {
+    "python": "3.9.25",
+    "torch": "2.8.0+cu128",
+    "cuda": "12.8",
+    "numpy": "2.0.2",
+    "scipy": "1.13.1"
+  },
+  "gpu_activation_recomputation": true,
+  "cpu_activation_offload": false,
+  "source_matches_douban_0189761": true
+}

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "baseline_loss": 2.0109293460845947,
+  "recomputed_loss": 2.0109293460845947,
+  "max_gradient_absolute_difference": 5.271285772323608e-07,
+  "gradient_parameter_count": 22,
+  "validation_batch_size": 16,
+  "training_batch_size": 2048,
+  "checkpoint_loaded": false,
+  "cpu_activation_offload": false
+}

@@ -1,4 +1,17 @@
-# ODSR Douban-Book：Recall@20 = 0.189761
+# ODSR：Douban 0.189761 对应的三个数据集实验
+
+三个实验使用相同的六个模型与训练源文件。每个数据集的实际启动参数及最佳结果如下：
+
+| 数据集 | Recall@20 | NDCG@20 | 最佳轮次 | 实验代码和启动配置 |
+|---|---:|---:|---:|---|
+| Douban-Book | 0.189761 | 0.172059 | 10 | [根目录](run.sh) |
+| Epinions | 0.086273 | 0.049644 | 4 | [experiments/epinions](experiments/epinions) |
+| Yelp2018 | 0.080804 | 0.053348 | 3 | [experiments/yelp](experiments/yelp) |
+
+Yelp 实际运行使用 GPU 候选激活重计算入口 `train_gpu_memory.py` 来控制显存；该入口已与实验源文件一起保留。两项新增实验均固定取 8 个社交邻居，从随机初始化训练。
+
+以下为根目录 Douban 实验的说明；Epinions 和 Yelp 的运行方式见各自目录中的 README。
+
 
 本仓库保存 2026-10-09 Douban-Book 实验实际使用的完整可读代码、启动脚本、生效参数和复现说明。该实验从随机初始化训练，第 10 轮获得最佳 Recall@20 **0.189761**。
 

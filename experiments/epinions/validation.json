@@ -1,0 +1,11 @@
+{
+  "strict_checkpoint_loading": "passed",
+  "scoring_device": "cpu",
+  "full_catalog_score_shape": [
+    2,
+    46119
+  ],
+  "scores_finite": true,
+  "effective_parameters_match_original": true,
+  "full_dataset_metrics_recomputed": false
+}

@@ -1,0 +1,5 @@
+{
+  "dataset/yelp2018/train.txt": "940a4407e41a39a42dfbe400c3fba8ec511db9d8dd193a15b1ca7e8d44235a4c",
+  "dataset/yelp2018/test.txt": "88c70e00b133c17ad1276ab650abf5ca490f3b63e7aff8c8223f6e5bbd47369c",
+  "dataset/yelp2018/trust.txt": "bbef012fabae84b528241b0cb8d86a868b400753516df022d76fd179a21c0bc0"
+}

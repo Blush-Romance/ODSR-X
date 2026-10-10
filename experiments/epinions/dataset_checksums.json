@@ -1,0 +1,5 @@
+{
+  "dataset/epinions/train.txt": "65254de66fc1684e42922578755c4c43b134460699a1d62ded282515d3510fd6",
+  "dataset/epinions/test.txt": "4d7e6189f1a489a1d18f004e58711220b4f529564fcc44497e54b4b203f4ba50",
+  "dataset/epinions/trust.txt": "1baefa4f5b66fb39e5df42807ed9601b98d757e90fe6abb4604b54c02b5a9125"
+}

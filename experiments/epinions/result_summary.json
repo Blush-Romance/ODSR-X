@@ -1,0 +1,23 @@
+{
+  "dataset": "epinions",
+  "best_epoch": 4,
+  "metrics": {
+    "recall@10": 0.057453,
+    "recall@20": 0.086273,
+    "ndcg@10": 0.041224,
+    "ndcg@20": 0.049644
+  },
+  "training_mode": "scratch",
+  "checkpoint_loaded": false,
+  "completed_evaluations": 54,
+  "environment": {
+    "python": "3.9.25",
+    "torch": "2.8.0+cu128",
+    "cuda": "12.8",
+    "numpy": "2.0.2",
+    "scipy": "1.13.1"
+  },
+  "gpu_activation_recomputation": false,
+  "cpu_activation_offload": false,
+  "source_matches_douban_0189761": true
+}
