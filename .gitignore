@@ -8,3 +8,8 @@ outputs/
 .env
 .env.*
 .venv/
+checkpoints/
+logs/
+results/
+cache/
+*.npy
