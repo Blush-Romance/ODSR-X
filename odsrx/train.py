@@ -80,7 +80,7 @@ def main():
     if args.prior == "ease":
         t = time.time()
         prior = item_prior_scores(data.R, args.prior_lam, args.prior_p, args.prior_beta,
-                                  cache_dir=os.path.join(os.path.dirname(__file__), "..", "cache"))
+                                  cache_dir=os.environ.get("ODSRX_CACHE"))
         prior = prior.to(dev) if dev.type == "cuda" and prior.numel() < 6e8 else prior
         print(f"prior ready ({time.time()-t:.0f}s) shape={tuple(prior.shape)}", flush=True)
 

@@ -65,7 +65,7 @@ def main():
     print(data.summary(), flush=True)
     graph = load_graph(data, args.graph)
     target = data.eval_dict  # validation in select mode, test in apply mode
-    cache = os.path.join(os.path.dirname(__file__), "..", "cache")
+    cache = os.environ.get("ODSRX_CACHE")  # opt-in: shared disk is nearly full
     ws = [args.w] if args.w is not None else [float(x) for x in args.ws.split(",")]
     res = {"args": vars(args), "split": "val" if args.val_ratio > 0 else "test", "grid": []}
     res["graph_only"] = evaluate(graph, data, target)
