@@ -65,6 +65,19 @@ MODE B（Step-0 零成本探针）。用户 2026-10-10 授权：可彻底重构�
 |---|---|---|---|---|
 | Epinions | 自训 E4 | .0822/.0477 | **.0895/.0522** | +8.9%/+9.5% |
 | Epinions | 官方 ckpt | .0885/.0509 | .0928/.0540 | +4.9%/+6.0% |
+| Douban | 自训 E17（val 选） | .1804/.1620 | **.2182/.2048** | +20.9%/+26.4% |
+| Douban | 官方 ckpt | .1867/.1669 | .2182/.2046 | +16.9%/+22.6% |
+
+Douban 选参（val）：λ=50 p=0.25 β=0.25 **w=2**，val .1669→.1986。
+Douban 消融：物品视图单独（同配置）test .2172/.2043 → 融合只再 +0.5%/+0.2%。**Douban 的增益主要来自闭式物品视图，必须如实写。**
+Yelp2018：官方 ckpt 复现 .0817/.0536；EASE λ400 .0729/.0487；GF-CF α0.3 .0753/.0493；官方 ckpt+EASE 融合（测试集探针）最好 w=0.25 .0827/.0545（+1.2%，互补性弱）。
+
+## 运行中（无人值守链）
+- scripts/chain_yelp2018.sh（log: logs/chain_yelp2018.log）：Yelp val-run → 选参 → 全量 E* → test 一次，结束打印 CHAIN_YELP_DONE
+- scripts/chain_seeds_epinions.sh（log: logs/chain_seeds_epinions.log）：Epinions seed 2027/2028
+
+## 事故记录
+- 2026-10-11 01:4x /mnt/data 写满（我方先验缓存+探针 B 矩阵共 51GB）→ Douban 选参进程 OSError 退出；已删全部可再生缓存、缓存改为 opt-in（ODSRX_CACHE），重跑。
 
 ## 下一步
 1. Epinions EASE 扫描完 + ODSR×EASE 融合探针 → 判断互补性
