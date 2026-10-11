@@ -152,3 +152,4 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - 11:26 CCNU1 内存告急（avail 1GB）：Yelp 社交 apply（33GB）与 Epinions lr2.5e-4 apply（24GB）重叠 ⇒ 杀掉 Epinions apply（未写出任何结果），改由 scripts/after_yelp_apply_epinions_lr25.sh 在 Yelp 链结束后串行重跑。
 - Epinions lr2.5e-4 val 重选：w=.25, w_soc=.15。
 - Yelp 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_112648_*）、CCNU2 lr2.5e-4（luokekingdom_20261011_112708_*），max_epoch 40、patience 4、只按 val 选。
+- Douban 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_113225_*，4 线程）已启动；lr2.5e-4 由 scripts/queue_douban_lr25.sh 在 Yelp 社交链结束后启动（6 线程）。max_epoch 80、patience 8（与原 Douban val run 一致）、只按 val 选。CCNU2 负载 53/32（他人占用）且无 Douban 数据，故全放 CCNU1。
