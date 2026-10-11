@@ -153,3 +153,4 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - Epinions lr2.5e-4 val 重选：w=.25, w_soc=.15。
 - Yelp 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_112648_*）、CCNU2 lr2.5e-4（luokekingdom_20261011_112708_*），max_epoch 40、patience 4、只按 val 选。
 - Douban 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_113225_*，4 线程）已启动；lr2.5e-4 由 scripts/queue_douban_lr25.sh 在 Yelp 社交链结束后启动（6 线程）。max_epoch 80、patience 8（与原 Douban val run 一致）、只按 val 选。CCNU2 负载 53/32（他人占用）且无 Douban 数据，故全放 CCNU1。
+- **方向1 Yelp**（val 选出 w=.25, w_soc=.1；val .1191→.1201）：test 自训 s2026/2027/2028 = .0826/.0827/.0830 → **均值 .0828/.0548**（G+E 为 .0823/.0545，社交视图 +0.6%）；官方 ckpt+E+SOC .0830/.0548。对 ODSR 论文 .0817/.0536：+1.3%/+2.2%，3 种子全部超过。
