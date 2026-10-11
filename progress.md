@@ -165,3 +165,4 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - 2026-10-11 12:00 启动（seed 2026，TF 4 线程，baselines/run_baseline.sh 一键 val→E*→全量→test 一次）：
   CCNU2：GBSR-Douban（~6min/epoch）、GBSR-Epinions（~4min/epoch）、SGIL-Douban；CCNU1：SGIL-Epinions val run = runs/smoke_sgil_epi（官方默认 seed 2024，~10min/epoch），结束后由 baselines/after_smoke_sgil_epinions.sh 接全量 E* 训练（seed 2026）。
   Yelp2018 的 GBSR/SGIL 等资源释放后再排（单 epoch 预计 >30min）。
+- Yelp 低 lr val run 第 1 轮：lr5e-4（CCNU1）2967s，val .0944；lr2.5e-4（CCNU2）3044s，val .0835（原配置 lr1e-3 第 1 轮 val .0990）。两台机都拥挤，~50min/epoch ⇒ lr5e-4 预计 ~10h、lr2.5e-4 ~1 天才出 val 峰值。
