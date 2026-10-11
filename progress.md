@@ -149,3 +149,6 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 | Yelp2018 | 2026/2027/2028 | .0800/.0800/.0792 → 均值 .0797/.0528 | .0822/.0822/.0826 → **均值 .0823/.0545** |
 - Yelp：3 种子全部高于 ODSR 论文 .0817（+0.8%/+1.6%），幅度小但稳定；Douban 3 种子极稳（std≈.0003）。
 - Yelp 社交视图链（after_seeds_yelp_social.sh）此时自动开始。
+- 11:26 CCNU1 内存告急（avail 1GB）：Yelp 社交 apply（33GB）与 Epinions lr2.5e-4 apply（24GB）重叠 ⇒ 杀掉 Epinions apply（未写出任何结果），改由 scripts/after_yelp_apply_epinions_lr25.sh 在 Yelp 链结束后串行重跑。
+- Epinions lr2.5e-4 val 重选：w=.25, w_soc=.15。
+- Yelp 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_112648_*）、CCNU2 lr2.5e-4（luokekingdom_20261011_112708_*），max_epoch 40、patience 4、只按 val 选。
