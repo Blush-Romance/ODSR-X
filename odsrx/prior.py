@@ -53,3 +53,22 @@ def item_prior_scores(R: sp.csr_matrix, lam: float, p: float, beta: float, cache
         os.makedirs(cache_dir, exist_ok=True)
         np.save(path, S.numpy())
     return S
+
+
+def social_scores(R: sp.csr_matrix, adj_uu: torch.Tensor, standardize: bool = True) -> torch.Tensor:
+    """Dense U x I social co-consumption view: mean of friends' interaction rows
+    (binary friendship, self loop removed, row-normalised), z-scored per user."""
+    a = adj_uu.coalesce()
+    idx = a.indices().cpu().numpy()
+    S = sp.csr_matrix((np.ones(idx.shape[1], np.float32), (idx[0], idx[1])), shape=(R.shape[0],) * 2)
+    S.setdiag(0)
+    S.eliminate_zeros()
+    deg = np.asarray(S.sum(1)).ravel()
+    S = sp.diags(1.0 / np.maximum(deg, 1)) @ S
+    SR = (S @ R.astype(np.float32)).tocsr()
+    out = torch.empty(R.shape, dtype=torch.float32)
+    for st in range(0, R.shape[0], 4096):
+        out[st:st + 4096] = torch.from_numpy(SR[st:st + 4096].toarray())
+    if standardize:
+        out.sub_(out.mean(1, keepdim=True)).div_(out.std(1, keepdim=True) + 1e-8)
+    return out

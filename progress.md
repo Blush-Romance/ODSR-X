@@ -114,3 +114,14 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
   我方 odsrx 同协议 run 231443 = ep2 .0772 / ep4 .0822 / ep6 .0828 ⇒ **两份代码逐轮吻合，我方实现无缺陷**。
   官方 ckpt 的 .0885 无法由公开代码+公开配置复现（差 6.6%）；上游仓库 GPU 自训 .0863 亦未达到。
   ⇒ 论文主表：同管线对比（ODSR vs ODSR-X，均自训）为主；"官方 ckpt + 物品视图"作为补充行，并注明 ckpt 不可复现。
+
+## 2026-10-11 方向1：多视图融合 Step-0 探针（Epinions val，probes/probe_multiview.py）
+- 单视图 val R@20：G .0739 / E .0711 / SOC(好友交互均值) .0375 / SOCE(好友交互经EASE) .0400 / RP3β .0104(全稠密未截断，偏弱) / POP .0361
+- 贪心前向加权（val）：G+E(.25) .0796 → +SOC(.1) **.0820 (+3.0%)** → +RP3(.1) .0824 → +SOCE(.1) .0829
+- 结论：社交共现视图是唯一有分量的新信息源（+3%）；RP3/SOCE 合计 +0.1pp，舍弃以保持方法简单。
+- 落地：odsrx/prior.py 新增 social_scores；fuse.py 新增 --soc_ws（默认 0，与旧行为逐位一致）；scripts/chain_social_epinions.sh 在 val 上选 (w, w_soc) 后 test 只评一次（3 种子 + 官方 ckpt）。
+- 已知小坑：首次运行因 ssh 单引号剥离导致 f-string 报错，未产生任何结果，已修复重跑。
+
+## 2026-10-11 方向2：图模型正则调参（CCNU2 luokekingdom，val 选轮）
+- CCNU2 环境：/mnt/data/zzx/conda_envs/odsr（torch 2.8.0+cpu, numpy 2.0.2, scipy 1.13.1）；代码 git bundle 同步 ab28cee；数据 sha256 与 CCNU1 一致。
+- 网格：reg0(对照) / reg1e-3 / lr5e-4（队列A）；reg3e-3 / reg1e-2（队列B）；patience 4、每轮 val。
