@@ -161,3 +161,7 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - 数据：baselines/export_gbsr_format.py 从 SocialRecData 导出（与 ODSR-X 同一划分、同一 id 映射），json → baselines/json_to_npy.py（tf115 env，numpy-1 pickle）。
 - 环境：/mnt/data/zzx/conda_envs/tf115（py3.7, tensorflow 1.15.5 CPU, numpy 1.18.5, faiss-cpu 1.7.2, numba 0.53.1）。
 - 协议：fit 划分上按 val 选 E* → 全量 train 训练 E* 轮 → test 只评一次。Yelp2018 用官方 yelp 超参（官方 Yelp 为另一份数据）。
+- 环境补丁：tf115 加装 torch 1.13.1+cpu（GBSR rec_dataset 顶部 import torch）与 tensorflow-probability 0.8.0（GBSR 模型）；CCNU1/CCNU2 两边同版本。首次两次 GBSR 启动因缺包立即失败（runs/*FAILED.txt），未产生结果。
+- 2026-10-11 12:00 启动（seed 2026，TF 4 线程，baselines/run_baseline.sh 一键 val→E*→全量→test 一次）：
+  CCNU2：GBSR-Douban（~6min/epoch）、GBSR-Epinions（~4min/epoch）、SGIL-Douban；CCNU1：SGIL-Epinions val run = runs/smoke_sgil_epi（官方默认 seed 2024，~10min/epoch），结束后由 baselines/after_smoke_sgil_epinions.sh 接全量 E* 训练（seed 2026）。
+  Yelp2018 的 GBSR/SGIL 等资源释放后再排（单 epoch 预计 >30min）。
