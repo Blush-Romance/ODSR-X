@@ -125,3 +125,5 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 ## 2026-10-11 方向2：图模型正则调参（CCNU2 luokekingdom，val 选轮）
 - CCNU2 环境：/mnt/data/zzx/conda_envs/odsr（torch 2.8.0+cpu, numpy 2.0.2, scipy 1.13.1）；代码 git bundle 同步 ab28cee；数据 sha256 与 CCNU1 一致。
 - 网格：reg0(对照) / reg1e-3 / lr5e-4（队列A）；reg3e-3 / reg1e-2（队列B）；patience 4、每轮 val。
+- 方向2 结果（Epinions val R@20 峰值@轮）：reg0 对照 .0740@4（与 CCNU1 .0740@4 一致）｜reg1e-3 .0699@2｜reg3e-3 .0468@1｜reg1e-2 .0246@1 ⇒ 范数正则全有害；
+  **lr5e-4 .0771@7（+4.3%）**。继续下探：lr2.5e-4、lr3.5e-4（max_epoch 40）。调好的超参将同时用于 ODSR 对照行和 ODSR-X，保证公平。
