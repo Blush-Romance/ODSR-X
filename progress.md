@@ -166,3 +166,12 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
   CCNU2：GBSR-Douban（~6min/epoch）、GBSR-Epinions（~4min/epoch）、SGIL-Douban；CCNU1：SGIL-Epinions val run = runs/smoke_sgil_epi（官方默认 seed 2024，~10min/epoch），结束后由 baselines/after_smoke_sgil_epinions.sh 接全量 E* 训练（seed 2026）。
   Yelp2018 的 GBSR/SGIL 等资源释放后再排（单 epoch 预计 >30min）。
 - Yelp 低 lr val run 第 1 轮：lr5e-4（CCNU1）2967s，val .0944；lr2.5e-4（CCNU2）3044s，val .0835（原配置 lr1e-3 第 1 轮 val .0990）。两台机都拥挤，~50min/epoch ⇒ lr5e-4 预计 ~10h、lr2.5e-4 ~1 天才出 val 峰值。
+
+## 2026-10-11 16:00 调学习率结算
+- **Epinions v3**（lr2.5e-4 图 + E + SOC，val 选 w=.25 w_soc=.15）test：s2026/27/28 = .0941/.0918/.0948 → **均值 .0936/.0548**；
+  调参后 ODSR 图单独 .0867/.0850/.0871 → 均值 .0863/.0498（原配置 .0824/.0476，+4.7%）。
+  ⇒ v3 与 v2（.0940/.0546）持平：调图模型抬高了 ODSR 对照行，但融合后结果几乎不变（物品+社交视图已补足图模型的欠缺）。主表 Epinions 采用 v2（原配置，更简单），调参 ODSR 作为额外对照行。
+- **Douban**：lr5e-4 val .1654@12、lr2.5e-4 val .1656@41，均不如原配置 lr1e-3 .1669@17 ⇒ Douban 保持原配置，不做全量重训。
+- **Yelp**：lr5e-4 val .1152@6（原配置 .1133@5，+1.7%）。lr2.5e-4（CCNU2）第 2 轮耗时 5986s，已停（STOPPED.txt），理由：>1 天才到峰值、Epinions 上 2.5e-4≈5e-4、需让出 CPU 给 GBSR/SGIL。
+  已启动 scripts/chain_yelp_lr5e-4.sh：3 种子全量 E6 → val 重选 (w, w_soc) → test 一次。
+- 同协议 baseline 进度：GBSR-Douban val 选出 E*=56（val R@20 .1613/N@20 .1284，odsrx 评估器），全量重训中；GBSR-Epinions val 第 98 轮；SGIL-Douban 第 13 轮（~19min/epoch）；SGIL-Epinions 第 36 轮。
