@@ -154,3 +154,10 @@ vs ODSR 论文 .0885/.0509：+1.0%/+2.4%（R@20 seed2027 略低，**R@20 不能�
 - Yelp 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_112648_*）、CCNU2 lr2.5e-4（luokekingdom_20261011_112708_*），max_epoch 40、patience 4、只按 val 选。
 - Douban 低学习率 val 调参（用户要求）：CCNU1 lr5e-4（hs-Ubuntu_20261011_113225_*，4 线程）已启动；lr2.5e-4 由 scripts/queue_douban_lr25.sh 在 Yelp 社交链结束后启动（6 线程）。max_epoch 80、patience 8（与原 Douban val run 一致）、只按 val 选。CCNU2 负载 53/32（他人占用）且无 Douban 数据，故全放 CCNU1。
 - **方向1 Yelp**（val 选出 w=.25, w_soc=.1；val .1191→.1201）：test 自训 s2026/2027/2028 = .0826/.0827/.0830 → **均值 .0828/.0548**（G+E 为 .0823/.0545，社交视图 +0.6%）；官方 ckpt+E+SOC .0830/.0548。对 ODSR 论文 .0817/.0536：+1.3%/+2.2%，3 种子全部超过。
+
+## 2026-10-11 同协议复现 SGIL / GBSR（用户要求）
+- 代码：官方 TF1 仓库（SGIL：github.com/yimutianyang/SIGIR2025-SGIL → ../ODSR_ref_SGIL；GBSR：../ODSR_ref_GBSR，TF 版=论文所用）原样拷到 baselines/{sgil,gbsr}，只打协议补丁（全部带 `# PATCH` 注释）：
+  ①验证集读真正的 valdata.npy（官方代码 valdata=testdata，按 test N@20 选轮且 SGIL ≥30 轮/GBSR ≥50 轮后才早停）；②数据路径/run 目录/用户物品数/seed/线程走环境变量；③FIXED_EPOCHS：全量 train 精确训练 E* 轮、中途不评；④保存最终嵌入，用 odsrx.evaluate 评分（baselines/eval_emb.py）。模型、损失、超参（README 命令行）不改。选轮指标保留各自原生的 val N@20。
+- 数据：baselines/export_gbsr_format.py 从 SocialRecData 导出（与 ODSR-X 同一划分、同一 id 映射），json → baselines/json_to_npy.py（tf115 env，numpy-1 pickle）。
+- 环境：/mnt/data/zzx/conda_envs/tf115（py3.7, tensorflow 1.15.5 CPU, numpy 1.18.5, faiss-cpu 1.7.2, numba 0.53.1）。
+- 协议：fit 划分上按 val 选 E* → 全量 train 训练 E* 轮 → test 只评一次。Yelp2018 用官方 yelp 超参（官方 Yelp 为另一份数据）。
