@@ -1,85 +1,74 @@
-# ODSR：Douban 0.189761 对应的三个数据集实验
+# ODSR-X: closed-form item and social views for robust social recommendation
 
-三个实验使用相同的六个模型与训练源文件。每个数据集的实际启动参数及最佳结果如下：
+ODSR-X adds two training-free views to the ODSR graph model (KDD'26, [official code](https://github.com/Rongfeng-Guo/ODSR-KDD-2026)) and fuses them late:
 
-| 数据集 | Recall@20 | NDCG@20 | 最佳轮次 | 实验代码和启动配置 |
-|---|---:|---:|---:|---|
-| Douban-Book | 0.189761 | 0.172059 | 10 | [根目录](run.sh) |
-| Epinions | 0.086273 | 0.049644 | 4 | [experiments/epinions](experiments/epinions) |
-| Yelp2018 | 0.080804 | 0.053348 | 3 | [experiments/yelp](experiments/yelp) |
-
-Yelp 实际运行使用 GPU 候选激活重计算入口 `train_gpu_memory.py` 来控制显存；该入口已与实验源文件一起保留。两项新增实验均固定取 8 个社交邻居，从随机初始化训练。
-
-以下为根目录 Douban 实验的说明；Epinions 和 Yelp 的运行方式见各自目录中的 README。
-
-
-本仓库保存 2026-10-09 Douban-Book 实验实际使用的完整可读代码、启动脚本、生效参数和复现说明。该实验从随机初始化训练，第 10 轮获得最佳 Recall@20 **0.189761**。
-
-| 指标 | 本次实验 | 原 RTX 4080 参考实验 |
-|---|---:|---:|
-| Recall@10 | 0.134551 | 0.134064 |
-| Recall@20 | **0.189761** | 0.189176 |
-| NDCG@10 | 0.165671 | 0.165515 |
-| NDCG@20 | 0.172059 | 0.172108 |
-
-## 完整源文件
-
-`source/` 包含 `main.py`、`ODSR.py`、`ODSR_base.py`、`ODSR_legacy.py`、`common.py`、`utils.py`。六个文件与实验实际使用的源文件逐字节一致，包含可读的骨干实现，无外部冻结 `.pyc` 依赖。`run.sh` 也保留原始训练命令。完整生效配置在 `experiment_config.json`，实际结果和环境摘要在 `result_summary.json`。
-
-## 准备数据与环境
-
-公共仓库提供代码及复现配置。训练数据、历史模型和原始运行日志保留在本地。
-
-将原实验的 Douban-Book 数据划分放在以下位置；`dataset_checksums.json` 提供校验值：
-
-```text
-dataset/douban-book/train.txt
-dataset/douban-book/test.txt
-dataset/douban-book/trust.txt
+```
+score(u, i) = z_u(ODSR graph) + w * z_u(item view) + w_soc * z_u(social view)
 ```
 
-0.189761 实验环境：Python 3.9.25、PyTorch 2.8.0+cu128、CUDA runtime 12.8、NumPy 2.0.2、SciPy 1.13.1，GPU 为 RTX 5070 Ti。
+- **Graph view**: the ODSR backbone, unchanged (`odsrx/backbone.py`; state-dict compatible with the official checkpoints).
+- **Item view**: an EASE-family closed-form item-item model with dropout regularisation and degree normalisation (`odsrx/prior.py`).
+- **Social view**: the mean of a user's friends' interaction rows (`odsrx/prior.social_scores`).
+- `z_u` standardises scores per user over the whole catalogue.
+
+The fusion weights and the item-view hyper-parameters are chosen on a validation split carved out of the training data. The validation split takes 20% of each user's training items, for users with at least 5 items (seed 0).
+
+## Results (Recall@20 / NDCG@20, full-catalogue ranking)
+
+**Our protocol.** Everything is chosen on validation only: the weights, the item-view hyper-parameters and the graph's training epochs. The graph is then retrained on the full training set for the selected number of epochs, and the test set is evaluated **once**. We report the mean over 3 seeds (2026–2028).
+
+| Method | Douban-Book | Epinions | Yelp2018 |
+|---|---|---|---|
+| GBSR, KDD'24 (paper) | .1694 / .1523 | .0793 / .0464 | — |
+| SGIL, SIGIR'25 (paper) | .1809 / .1627 | .0844 / .0489 | .0797 / .0524 † |
+| ODSR, KDD'26 (paper) | .1867 / .1669 | .0885 / .0509 | .0817 / .0536 |
+| ODSR, same code and our protocol | .1822 / .1634 | .0824 / .0476 | .0797 / .0528 |
+| ODSR, learning rate tuned on validation | (no gain) | .0863 / .0498 | in progress |
+| **ODSR-X** | **.2180 / .2043** | **.0940 / .0546** | **.0828 / .0548** |
+
+† SGIL on Yelp2018 as reported in the ODSR paper.
+
+**Paper numbers** use the ODSR / GBSR / SGIL protocol: the test set is evaluated every epoch and the best epoch is kept. Same-protocol reruns of GBSR and SGIL are in `baselines/` and are still running.
+
+### Caveats
+
+- **Douban-Book**: almost all of the gain comes from the item view. The item view alone reaches .2172 / .2043. The social view's weight is selected as 0 on validation.
+- **Epinions**: the gain is shared between views. The item view adds about +8.5% over the same-code ODSR, and the social view adds a further +5.1%.
+- **Yelp2018**: the margin over the ODSR paper is small (+1.3% / +2.2%), although every seed is above it.
+- **Official checkpoints**: the official ODSR checkpoints score exactly the paper numbers. However, retraining with the released `main.py` and config reaches only about .083 on Epinions, so the checkpoints are not reproducible from the released code. Our implementation follows the official training curve epoch by epoch (`progress.md`).
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `odsrx/` | data loading (same id mapping and graphs as ODSR), backbone, training, evaluation, closed-form views, fusion |
+| `scripts/` | run launchers and the exact chains used for every reported number |
+| `probes/` | step-0 diagnostics (oracle / headroom probes) |
+| `baselines/` | same-protocol GBSR / SGIL: data export, protocol patch script, chain runner, embedding evaluator |
+| `tests/` | equivalence tests against the official ODSR code and checkpoints |
+| `source/`, `experiments/`, `docs/UPSTREAM_README.md` | the upstream tuned-ODSR code this project started from (kept unchanged) |
+| `progress.md` | full research log: every run, number, failure and decision (in Chinese) |
+
+## Usage
 
 ```bash
-python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
-python -m pip install numpy==2.0.2 scipy==1.13.1
-sha256sum -c SHA256SUMS
-CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True PYTHON_BIN=python bash run.sh
+# data: dataset/{douban-book,epinions,yelp2018}/{train,test,trust}.txt
+#   Douban-Book: SELFRec files; Epinions: GBSR public .npy exported as "u i" lines (probes/conv_gbsr_npy.py);
+#   Yelp2018: the official ODSR Git LFS files. SHA-256 values are in dataset_checksums.json.
+
+# 1) graph on the fit split, epoch chosen on validation
+python -m odsrx.train --dataset epinions --prior none --val_ratio 0.2 --run_dir runs/epi_val
+# 2) choose item-view hyper-parameters and fusion weights on validation
+python -m odsrx.fuse --dataset epinions --val_ratio 0.2 --graph runs/epi_val/best.pth \
+    --lams 200 --ps 0.25 --betas 0.25 --ws 0.1,0.25,0.5 --soc_ws 0,0.05,0.1,0.15,0.2,0.3 --out select.json
+# 3) retrain the graph on the full training set for E* epochs, then evaluate the test set once
+python -m odsrx.train --dataset epinions --prior none --max_epoch 4 --eval_interval 4 --run_dir runs/epi_full
+python -m odsrx.fuse --dataset epinions --graph runs/epi_full/best.pth --lams 200 --ps 0.25 --betas 0.25 \
+    --w 0.25 --soc_ws 0.2 --out apply.json
 ```
 
-新训练结果写入 `outputs/best.pth` 和 `outputs/training.log`。执行脚本会更新 `outputs/` 内文件。原 RTX 4080 参考环境为 Python 3.9.25、PyTorch 2.7.1+cu118、NumPy 1.24.4、SciPy 1.10.1。不同环境重新训练可能产生数值差异；上述指标来自原完整实验记录。
+**Baselines.** `python baselines/apply_patches.py` clones the official GBSR and SGIL repositories at the commits we used and writes protocol-patched copies. The official repositories have no license, so their code is not redistributed here. Each change is marked `# PATCH`, and the models, losses and hyper-parameters are left untouched. Then run `bash baselines/run_baseline.sh <gbsr|sgil> <dataset> <threads> <seed>`.
 
-## 参数与逻辑
+## License
 
-| 参数 | 值 |
-|---|---:|
-| seed | 2026 |
-| learning rate | 0.002 |
-| reg / ssl_reg / eps | 0.00001 / 0.5 / 0.8 |
-| batch_size / dropout | 2048 / 0.01 |
-| embedding dimension / graph layers | 64 / 3 |
-| SSL temperature | 0.2 |
-| max_epoch / patience | 100 / 50 |
-| eval_interval | 1 |
-| eval_batch / eval_item_batch | 64 / 512 |
-| 用户历史上限 / Top-L | 64 / 8 |
-| 邻居数 | 8 |
-| 邻居历史上限 / Top-L | 16 / 4 |
-| 候选校正范围 | backbone Top-512 未见物品 |
-| candidate_loss_weight | 0.2 |
-| hard_pool_size / hard_topk | 64 / 8 |
-
-邻居按社交边权排序固定取前 8 个，同权按邻居 ID 排序。候选表示由可学习 Q/K/V 检索历史物品生成；每个邻居先对最多 16 条历史计算，再取 Top-4。本实验使用未截断的骨干 sigmoid 门控、完整历史检索，无 79 的两阶段粗筛。负采样排除训练历史，使用独立 NumPy RNG，并保持每行负样本互异。
-
-评估使用完整物品目录并屏蔽训练交互，报告 Recall/NDCG@10、@20；最优模型由 Recall@20 选择。
-
-## 评估训练所得模型
-
-```bash
-python source/main.py --data_root dataset --dataset douban-book --device cuda \
-  --ckpt outputs/best.pth --eval_batch 64 --eval_item_batch 512
-```
-
-## 验证
-
-六个源文件和启动脚本与原实验校验值一致；本地原最佳模型通过严格参数加载，并在 CPU 上为两个用户生成有限的完整目录评分。此检查未重新计算全数据集指标。
+The MIT license (see `LICENSE`) covers our code in `odsrx/`, `scripts/`, `probes/`, `baselines/*.py|*.sh` and `tests/`. `odsrx/backbone.py` is adapted from the MIT-licensed official ODSR code (© 2026 Rongfeng-Guo). Files under `source/` and `experiments/` come from the upstream repository and keep its terms.

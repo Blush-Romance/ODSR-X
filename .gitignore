@@ -14,3 +14,7 @@ results/
 cache/
 *.npy
 runs/
+baselines/gbsr/
+baselines/sgil/
+baselines/_official/
+baselines/data/
